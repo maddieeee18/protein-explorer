@@ -43,5 +43,4 @@ def show_protein_structure(pdb_id):
         st.error(
             "Could not retrieve this structure from RCSB PDB."
         )
-        from viewer import show_protein_structure
         
