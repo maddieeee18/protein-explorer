@@ -2,6 +2,7 @@
 import streamlit as st
 from viewer import show_protein_structure
 from structures import find_pdb_structures
+from domains import get_protein_data, get_protein_summary, get_domains
 
 st.set_page_config(
     page_title="Protein Explorer",
@@ -78,3 +79,59 @@ if st.button("View 3D Structure"):
         show_protein_structure(pdb_id)
     else:
         st.warning("Please enter a PDB ID.")
+
+
+st.divider()
+
+st.header("Protein Domain Identification")
+
+domain_accession = st.text_input(
+    "Enter UniProt accession for domain analysis",
+    placeholder="Example: P36888",
+    key="domain_search"
+)
+
+if st.button("Identify Domains"):
+
+    if not domain_accession.strip():
+        st.warning("Please enter a UniProt accession.")
+
+    else:
+
+        with st.spinner("Identifying protein domains..."):
+
+            try:
+
+                protein = get_protein_data(domain_accession)
+
+                summary = get_protein_summary(protein)
+
+                domains = get_domains(protein)
+
+                st.success("Protein information retrieved!")
+
+                st.subheader("Protein Information")
+
+                st.write("**Accession:**", summary["accession"])
+                st.write("**Protein Name:**", summary["name"])
+                st.write("**Gene:**", summary["gene"])
+                st.write("**Organism:**", summary["organism"])
+                st.write(
+                    "**Sequence Length:**",
+                    summary["length"]
+                )
+
+                st.subheader("Identified Protein Domains")
+
+                if domains:
+                    st.dataframe(
+                        domains,
+                        use_container_width=True,
+                        hide_index=True
+                    )
+                else:
+                    st.info("No annotated domains found.")
+
+            except (ValueError, RuntimeError) as error:
+                st.error(str(error))
+    
